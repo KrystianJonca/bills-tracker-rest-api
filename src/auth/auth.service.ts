@@ -30,10 +30,11 @@ export class AuthService {
 
   async signup(dto: AuthDto) {
     const hash = await argon.hash(dto.password);
+    delete dto.password;
     try {
       const user = await this.db.user.create({
         data: {
-          email: dto.email,
+          ...dto,
           passwordHash: hash,
         },
       });
