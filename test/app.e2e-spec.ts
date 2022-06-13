@@ -5,6 +5,7 @@ import { AppModule } from './../src/app.module';
 import { DatabaseService } from '../src/database/database.service';
 import { AuthDto } from 'src/auth/dto';
 import { EditUserDto } from 'src/user/dto';
+import { CreateBillDto, EditBillDto } from 'src/bill/dto';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
@@ -122,38 +123,81 @@ describe('AppController (e2e)', () => {
           .expectBodyContains(editDto.firstName);
       });
     });
+  });
 
-    describe('Delete user', () => {
-      it('should delete the user', () => {
+  describe('Bills', () => {
+    describe('Create new bill', () => {
+      const dto: CreateBillDto = {
+        amount: 10,
+        description: 'Test Bill',
+      };
+      it('create a new bill', () => {
         return pactum
           .spec()
-          .delete('/user')
+          .post('/bills')
+          .withHeaders({ Authorization: 'Bearer $S{user_access_token}' })
+          .withBody(dto)
+          .expectStatus(201)
+          .stores('billId', 'id');
+      });
+    });
+    describe('Get bill', () => {
+      it('should get the bill', () => {
+        return pactum
+          .spec()
+          .get('/bills/{id}')
+          .withPathParams('id', '$S{billId}')
+          .withHeaders({ Authorization: 'Bearer $S{user_access_token}' })
+          .expectStatus(200);
+      });
+    });
+
+    describe('Get all bills', () => {
+      it('should get all bills', () => {
+        return pactum
+          .spec()
+          .get('/bills')
+          .withHeaders({ Authorization: 'Bearer $S{user_access_token}' })
+          .expectStatus(200);
+      });
+    });
+
+    describe('Edit bill', () => {
+      it('should edit the bill', () => {
+        const editDto: EditBillDto = {
+          description: 'Edited Bill',
+        };
+        return pactum
+          .spec()
+          .patch('/bills/{id}')
+          .withPathParams('id', '$S{billId}')
+          .withBody(editDto)
           .withHeaders({ Authorization: 'Bearer $S{user_access_token}' })
           .expectStatus(200)
-          .expectBodyContains('email');
+          .expectBodyContains(editDto.description);
+      });
+    });
+
+    describe('Delete bill', () => {
+      it('should delete the bill', () => {
+        return pactum
+          .spec()
+          .delete('/bills/{id}')
+          .withPathParams('id', '$S{billId}')
+          .withHeaders({ Authorization: 'Bearer $S{user_access_token}' })
+          .expectStatus(204);
       });
     });
   });
 
-  describe('Bills', () => {
-    describe('Get bill', () => {
-      it.todo('Should get the bill');
-    });
-
-    describe('Get all bills', () => {
-      it.todo('Should get all the bills');
-    });
-
-    describe('Create new bill', () => {
-      it.todo('Should create a new bill');
-    });
-
-    describe('Edit bill', () => {
-      it.todo('Should edit the bill');
-    });
-
-    describe('Delete bill', () => {
-      it.todo('Should delete the bill');
+  describe('Delete user', () => {
+    it('should delete the user', () => {
+      return pactum
+        .spec()
+        .delete('/user')
+        .withHeaders({ Authorization: 'Bearer $S{user_access_token}' })
+        .expectStatus(200)
+        .expectBodyContains('email');
     });
   });
 });
