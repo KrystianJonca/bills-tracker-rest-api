@@ -1,7 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
+import * as pactum from 'pactum';
 import { AppModule } from './../src/app.module';
 import { DatabaseService } from '../src/database/database.service';
+import { AuthDto } from 'src/auth/dto';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
@@ -19,9 +21,10 @@ describe('AppController (e2e)', () => {
       }),
     );
     await app.init();
-    await app.listen('3000');
+    await app.listen('3001');
     db = app.get(DatabaseService);
     await db.cleanDb();
+    pactum.request.setBaseUrl('http://localhost:3001');
   });
 
   afterAll(() => {
@@ -29,12 +32,61 @@ describe('AppController (e2e)', () => {
   });
 
   describe('Auth', () => {
-    describe('Signin', () => {
-      it.todo('Should sign in');
-    });
-
+    const dto: AuthDto = {
+      email: 'test@email.ok',
+      password: '1234',
+    };
     describe('Signup', () => {
-      it.todo('Should sign up');
+      it('should throw when password is empty', () => {
+        return pactum
+          .spec()
+          .post('/auth/signup')
+          .withBody({ email: dto.email })
+          .expectStatus(400);
+      });
+      it('should throw when email is empty', () => {
+        return pactum
+          .spec()
+          .post('/auth/signup')
+          .withBody({ password: dto.password })
+          .expectStatus(400);
+      });
+      it('should throw when body is empty', () => {
+        return pactum.spec().post('/auth/signup').expectStatus(400);
+      });
+      it('should signup', () => {
+        return pactum
+          .spec()
+          .post('/auth/signup')
+          .withBody(dto)
+          .expectStatus(201);
+      });
+    });
+    describe('Signin', () => {
+      it('should throw when password is empty', () => {
+        return pactum
+          .spec()
+          .post('/auth/signin')
+          .withBody({ email: dto.email })
+          .expectStatus(400);
+      });
+      it('should throw when email is empty', () => {
+        return pactum
+          .spec()
+          .post('/auth/signin')
+          .withBody({ password: dto.password })
+          .expectStatus(400);
+      });
+      it('should throw when body is empty', () => {
+        return pactum.spec().post('/auth/signup').expectStatus(400);
+      });
+      it('should signup', () => {
+        return pactum
+          .spec()
+          .post('/auth/signin')
+          .withBody(dto)
+          .expectStatus(200);
+      });
     });
   });
 
