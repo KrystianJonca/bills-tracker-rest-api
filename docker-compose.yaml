@@ -8,5 +8,13 @@ services:
       - '5432:5432'
     networks:
       - nest-rest-api
+  test-db:
+    image: 'postgres:latest'
+    env_file:
+      - .env
+    ports:
+      - '5435:5432'
+    networks:
+      - nest-rest-api
 networks:
   nest-rest-api:
