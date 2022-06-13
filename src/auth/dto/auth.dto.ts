@@ -12,9 +12,9 @@ export class AuthDto {
 
   @IsString()
   @IsOptional()
-  firstName: User['firstName'];
+  firstName?: User['firstName'];
 
   @IsString()
   @IsOptional()
-  lastName: User['lastName'];
+  lastName?: User['lastName'];
 }
