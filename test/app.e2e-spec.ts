@@ -4,6 +4,7 @@ import * as pactum from 'pactum';
 import { AppModule } from './../src/app.module';
 import { DatabaseService } from '../src/database/database.service';
 import { AuthDto } from 'src/auth/dto';
+import { EditUserDto } from 'src/user/dto';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
@@ -80,27 +81,57 @@ describe('AppController (e2e)', () => {
       it('should throw when body is empty', () => {
         return pactum.spec().post('/auth/signup').expectStatus(400);
       });
-      it('should signup', () => {
+      it('should signin', () => {
         return pactum
           .spec()
           .post('/auth/signin')
           .withBody(dto)
-          .expectStatus(200);
+          .expectStatus(200)
+          .stores('user_access_token', 'access_token');
       });
     });
   });
 
   describe('User', () => {
     describe('Get user', () => {
-      it.todo('Should get the user');
+      it('should throw if unathorized', () => {
+        return pactum.spec().get('/user').expectStatus(401);
+      });
+      it('should get current user', () => {
+        return pactum
+          .spec()
+          .get('/user')
+          .withHeaders({ Authorization: 'Bearer $S{user_access_token}' })
+          .expectStatus(200)
+          .expectBodyContains('email');
+      });
     });
 
     describe('Edit user', () => {
-      it.todo('Should edit the user');
+      it('should edit the user', () => {
+        const editDto: EditUserDto = {
+          firstName: 'Test',
+          lastName: 'User',
+        };
+        return pactum
+          .spec()
+          .patch('/user')
+          .withBody(editDto)
+          .withHeaders({ Authorization: 'Bearer $S{user_access_token}' })
+          .expectStatus(200)
+          .expectBodyContains(editDto.firstName);
+      });
     });
 
     describe('Delete user', () => {
-      it.todo('Should delete the user');
+      it('should delete the user', () => {
+        return pactum
+          .spec()
+          .delete('/user')
+          .withHeaders({ Authorization: 'Bearer $S{user_access_token}' })
+          .expectStatus(200)
+          .expectBodyContains('email');
+      });
     });
   });
 
