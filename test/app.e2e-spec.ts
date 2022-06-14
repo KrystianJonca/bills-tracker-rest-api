@@ -95,7 +95,7 @@ describe('AppController (e2e)', () => {
 
   describe('User', () => {
     describe('Get user', () => {
-      it('should throw if unathorized', () => {
+      it('should throw if unauthorized', () => {
         return pactum.spec().get('/user').expectStatus(401);
       });
       it('should get current user', () => {
@@ -130,6 +130,7 @@ describe('AppController (e2e)', () => {
       const dto: CreateBillDto = {
         amount: 10,
         description: 'Test Bill',
+        billDate: new Date().toISOString(),
       };
       it('create a new bill', () => {
         return pactum
@@ -138,7 +139,8 @@ describe('AppController (e2e)', () => {
           .withHeaders({ Authorization: 'Bearer $S{user_access_token}' })
           .withBody(dto)
           .expectStatus(201)
-          .stores('billId', 'id');
+          .stores('billId', 'id')
+          .inspect();
       });
     });
     describe('Get bill', () => {

@@ -33,6 +33,7 @@ model Bill {
 
   amount      Float
   description String
+  billDate    String
 
   userId Int
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)

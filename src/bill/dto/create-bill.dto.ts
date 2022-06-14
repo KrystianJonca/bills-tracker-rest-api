@@ -1,5 +1,5 @@
 import { Bill } from '@prisma/client';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsDateString, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class CreateBillDto {
   @IsNumber()
@@ -9,4 +9,8 @@ export class CreateBillDto {
   @IsString()
   @IsNotEmpty()
   description: Bill['description'];
+
+  @IsDateString()
+  @IsNotEmpty()
+  billDate: Bill['billDate'];
 }

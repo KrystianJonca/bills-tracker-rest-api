@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "bills" ALTER COLUMN "billDate" DROP DEFAULT,
+ALTER COLUMN "billDate" SET DATA TYPE TEXT;
