@@ -139,8 +139,7 @@ describe('AppController (e2e)', () => {
           .withHeaders({ Authorization: 'Bearer $S{user_access_token}' })
           .withBody(dto)
           .expectStatus(201)
-          .stores('billId', 'id')
-          .inspect();
+          .stores('billId', 'id');
       });
     });
     describe('Get bill', () => {
