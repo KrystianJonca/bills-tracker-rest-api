@@ -31,7 +31,7 @@ export class BillService {
     const bill = await this.db.bill.findUnique({ where: { id: billId } });
 
     if (!bill || bill.userId !== userId)
-      throw new ForbiddenException('Resourse is not accessible.');
+      throw new ForbiddenException('Resource is not accessible.');
 
     const editedBill = await this.db.bill.update({
       where: { id: billId },
@@ -44,7 +44,7 @@ export class BillService {
     const bill = await this.db.bill.findUnique({ where: { id: billId } });
 
     if (!bill || bill.userId !== userId)
-      throw new ForbiddenException('Resourse is not accessible.');
+      throw new ForbiddenException('Resource is not accessible.');
 
     const deletedBill = await this.db.bill.delete({ where: { id: billId } });
     return deletedBill;
