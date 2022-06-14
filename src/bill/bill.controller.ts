@@ -16,6 +16,7 @@ import {
   ApiParam,
   ApiTags,
   ApiCreatedResponse,
+  ApiNoContentResponse,
 } from '@nestjs/swagger';
 import { Bill, User } from '@prisma/client';
 import { GetUser } from '../auth/decorator';
@@ -65,7 +66,7 @@ export class BillController {
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
-  @ApiOkResponse({ type: BillEntity })
+  @ApiNoContentResponse({ type: BillEntity })
   @ApiParam({ name: 'id', description: 'Bill id' })
   deleteBill(
     @GetUser('id') userId: User['id'],
