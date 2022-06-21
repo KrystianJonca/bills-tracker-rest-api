@@ -11,10 +11,5 @@ export class EditUserDto {
   @IsString()
   @IsOptional()
   @ApiProperty({ type: String, required: false })
-  firstName?: User['firstName'];
-
-  @IsString()
-  @IsOptional()
-  @ApiProperty({ type: String, required: false })
-  lastName?: User['lastName'];
+  username?: User['username'];
 }

@@ -12,7 +12,5 @@ export class UserEntity implements Partial<User> {
   @ApiProperty({ type: String })
   email: User['email'];
   @ApiProperty({ type: String })
-  firstName?: User['firstName'];
-  @ApiProperty({ type: String })
-  lastName?: User['lastName'];
+  username: User['username'];
 }

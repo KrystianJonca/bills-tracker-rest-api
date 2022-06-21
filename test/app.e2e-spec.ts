@@ -3,7 +3,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as pactum from 'pactum';
 import { AppModule } from './../src/app.module';
 import { DatabaseService } from '../src/database/database.service';
-import { AuthDto } from 'src/auth/dto';
+import { SignUpDto } from 'src/auth/dto';
 import { EditUserDto } from 'src/user/dto';
 import { CreateBillDto, EditBillDto } from 'src/bill/dto';
 
@@ -34,8 +34,9 @@ describe('AppController (e2e)', () => {
   });
 
   describe('Auth', () => {
-    const dto: AuthDto = {
+    const dto: SignUpDto = {
       email: 'test@email.ok',
+      username: 'Hi',
       password: '1234',
     };
     describe('Signup', () => {
@@ -86,7 +87,7 @@ describe('AppController (e2e)', () => {
         return pactum
           .spec()
           .post('/auth/signin')
-          .withBody(dto)
+          .withBody({ email: dto.email, password: dto.password })
           .expectStatus(200)
           .stores('user_access_token', 'access_token');
       });
@@ -111,8 +112,7 @@ describe('AppController (e2e)', () => {
     describe('Edit user', () => {
       it('should edit the user', () => {
         const editDto: EditUserDto = {
-          firstName: 'Test',
-          lastName: 'User',
+          username: 'Test',
         };
         return pactum
           .spec()
@@ -120,7 +120,7 @@ describe('AppController (e2e)', () => {
           .withBody(editDto)
           .withHeaders({ Authorization: 'Bearer $S{user_access_token}' })
           .expectStatus(200)
-          .expectBodyContains(editDto.firstName);
+          .expectBodyContains(editDto.username);
       });
     });
   });
