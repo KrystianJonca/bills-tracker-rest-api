@@ -62,7 +62,32 @@ describe('AppController (e2e)', () => {
           .spec()
           .post('/auth/signup')
           .withBody(dto)
-          .expectStatus(201);
+          .expectStatus(201)
+          .stores('signup_user_access_token', 'access_token')
+          .stores('signup_user_refresh_token', 'refresh_token');
+      });
+    });
+    describe('Refresh token & Logout', () => {
+      it('should refresh token', () => {
+        return pactum
+          .spec()
+          .post('/auth/refresh')
+          .withHeaders({
+            Authorization: 'Bearer $S{signup_user_refresh_token}',
+          })
+          .withBody({ refresh_token: '$S{signup_user_refresh_token}' })
+          .expectStatus(200)
+          .stores('refresh_user_access_token', 'access_token')
+          .stores('refresh_user_refresh_token', 'refresh_token');
+      });
+      it('should logout', () => {
+        return pactum
+          .spec()
+          .post('/auth/logout')
+          .withHeaders({
+            Authorization: 'Bearer $S{refresh_user_refresh_token}',
+          })
+          .expectStatus(200);
       });
     });
     describe('Signin', () => {
@@ -81,7 +106,7 @@ describe('AppController (e2e)', () => {
           .expectStatus(400);
       });
       it('should throw when body is empty', () => {
-        return pactum.spec().post('/auth/signup').expectStatus(400);
+        return pactum.spec().post('/auth/signin').expectStatus(400);
       });
       it('should signin', () => {
         return pactum
@@ -89,7 +114,8 @@ describe('AppController (e2e)', () => {
           .post('/auth/signin')
           .withBody({ email: dto.email, password: dto.password })
           .expectStatus(200)
-          .stores('user_access_token', 'access_token');
+          .stores('user_access_token', 'access_token')
+          .stores('user_refresh_token', 'refresh_token');
       });
     });
   });

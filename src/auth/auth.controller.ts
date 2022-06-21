@@ -1,8 +1,18 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { User } from '@prisma/client';
 import { AuthService } from './auth.service';
-import { SignInDto, SignUpDto } from './dto';
+import { GetUser } from './decorator';
+import { SignInDto, SignUpDto, RefreshDto } from './dto';
 import { AuthEntity } from './entities';
+import { RtJwtGuard } from './guard';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -12,13 +22,27 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('signin')
   @ApiOkResponse({ type: AuthEntity })
-  signin(@Body() dto: SignInDto) {
-    return this.authService.signin(dto);
+  signIn(@Body() dto: SignInDto) {
+    return this.authService.signIn(dto);
+  }
+
+  @Post('logout')
+  @UseGuards(RtJwtGuard)
+  @HttpCode(HttpStatus.OK)
+  logout(@GetUser('id') userId: User['id']) {
+    return this.authService.logout(userId);
+  }
+
+  @Post('refresh')
+  @UseGuards(RtJwtGuard)
+  @HttpCode(HttpStatus.OK)
+  refresh(@GetUser('id') userId: User['id'], @Body() dto: RefreshDto) {
+    return this.authService.refreshTokens(userId, dto.refresh_token);
   }
 
   @Post('signup')
   @ApiCreatedResponse({ type: AuthEntity })
-  signup(@Body() dto: SignUpDto) {
-    return this.authService.signup(dto);
+  signUp(@Body() dto: SignUpDto) {
+    return this.authService.signUp(dto);
   }
 }

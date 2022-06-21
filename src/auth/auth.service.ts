@@ -14,7 +14,7 @@ export class AuthService {
     private readonly config: ConfigService,
   ) {}
 
-  async signin(dto: SignInDto) {
+  async signIn(dto: SignInDto) {
     const user = await this.db.user.findUnique({
       where: {
         email: dto.email,
@@ -25,10 +25,12 @@ export class AuthService {
     const passwordMath = await argon.verify(user.passwordHash, dto.password);
     if (!passwordMath) throw new ForbiddenException('Password is incorrect!');
 
-    return this.signToken(user.id, user.username, user.email);
+    const tokens = await this.signTokens(user.id, user.username, user.email);
+    await this.updateRefreshToken(user.id, tokens.refresh_token);
+    return tokens;
   }
 
-  async signup(dto: SignUpDto) {
+  async signUp(dto: SignUpDto) {
     const hash = await argon.hash(dto.password);
     delete dto.password;
     try {
@@ -38,7 +40,9 @@ export class AuthService {
           passwordHash: hash,
         },
       });
-      return this.signToken(user.id, user.username, user.email);
+      const tokens = await this.signTokens(user.id, user.username, user.email);
+      await this.updateRefreshToken(user.id, tokens.refresh_token);
+      return tokens;
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError)
         if (error.code === 'P2002')
@@ -47,17 +51,68 @@ export class AuthService {
     }
   }
 
-  async signToken(userId: number, username: string, email: string) {
+  async logout(userId: number) {
+    try {
+      await this.db.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          refreshTokenHash: null,
+        },
+      });
+      return { message: 'Logged out' };
+    } catch (error) {
+      throw new ForbiddenException('Could not log out');
+    }
+  }
+
+  async refreshTokens(userId: number, refreshToken: string) {
+    const user = await this.db.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+    if (!user || !user.refreshTokenHash)
+      throw new ForbiddenException('Access denied');
+
+    const refreshTokenMath = await argon.verify(
+      user.refreshTokenHash,
+      refreshToken,
+    );
+    if (!refreshTokenMath) throw new ForbiddenException('Access denied');
+
+    const tokens = await this.signTokens(user.id, user.username, user.email);
+    await this.updateRefreshToken(user.id, tokens.refresh_token);
+
+    return tokens;
+  }
+
+  async signTokens(userId: number, username: string, email: string) {
     const payload = {
       sub: userId,
       username,
       email,
     };
-    const secret = this.config.get('JWT_SECRET');
-    const token = await this.jwt.signAsync(payload, {
+
+    const access_token = await this.jwt.signAsync(payload, {
       expiresIn: '15m',
-      secret,
+      secret: this.config.get('AT_JWT_SECRET'),
     });
-    return { access_token: token };
+    const refresh_token = await this.jwt.signAsync(payload, {
+      expiresIn: '7d',
+      secret: this.config.get('RT_JWT_SECRET'),
+    });
+
+    return { access_token, refresh_token };
+  }
+
+  async updateRefreshToken(userId: number, refreshToken: string) {
+    const refreshTokenHash = await argon.hash(refreshToken);
+
+    return this.db.user.update({
+      where: { id: userId },
+      data: { refreshTokenHash },
+    });
   }
 }
