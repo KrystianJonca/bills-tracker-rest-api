@@ -6,12 +6,12 @@ import {
   Patch,
   Body,
 } from '@nestjs/common';
+import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { User } from '@prisma/client';
 import { JwtGuard } from '../auth/guard';
 import { GetUser } from '../auth/decorator';
-import { User } from '@prisma/client';
 import { UserService } from './user.service';
 import { EditUserDto } from './dto';
-import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { UserEntity } from './entities';
 
 @UseGuards(JwtGuard)
