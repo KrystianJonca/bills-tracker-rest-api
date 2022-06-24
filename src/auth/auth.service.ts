@@ -67,7 +67,7 @@ export class AuthService {
     }
   }
 
-  async refreshTokens(userId: number, refreshToken: string) {
+  async refreshToken(userId: number, refreshToken: string) {
     const user = await this.db.user.findUnique({
       where: {
         id: userId,
@@ -76,16 +76,15 @@ export class AuthService {
     if (!user || !user.refreshTokenHash)
       throw new ForbiddenException('Access denied');
 
-    const refreshTokenMath = await argon.verify(
+    const refreshTokenMatch = await argon.verify(
       user.refreshTokenHash,
       refreshToken,
     );
-    if (!refreshTokenMath) throw new ForbiddenException('Access denied');
+    if (!refreshTokenMatch) throw new ForbiddenException('Access denied');
 
     const tokens = await this.signTokens(user.id, user.username, user.email);
-    await this.updateRefreshToken(user.id, tokens.refresh_token);
 
-    return tokens;
+    return { access_token: tokens.access_token };
   }
 
   async signTokens(userId: number, username: string, email: string) {

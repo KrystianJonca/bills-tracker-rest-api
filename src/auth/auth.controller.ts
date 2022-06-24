@@ -37,7 +37,7 @@ export class AuthController {
   @UseGuards(RtJwtGuard)
   @HttpCode(HttpStatus.OK)
   refresh(@GetUser('id') userId: User['id'], @Body() dto: RefreshDto) {
-    return this.authService.refreshTokens(userId, dto.refresh_token);
+    return this.authService.refreshToken(userId, dto.refresh_token);
   }
 
   @Post('signup')
