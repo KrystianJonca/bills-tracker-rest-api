@@ -10,8 +10,12 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
-    new FastifyAdapter({ logger: true }),
+    new FastifyAdapter(),
   );
+  app.enableCors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+  });
   app.useGlobalPipes(new ValidationPipe());
 
   const config = new DocumentBuilder()
@@ -24,6 +28,6 @@ async function bootstrap() {
 
   SwaggerModule.setup('api', app, document);
 
-  await app.listen(3000);
+  await app.listen(4000);
 }
 bootstrap();
