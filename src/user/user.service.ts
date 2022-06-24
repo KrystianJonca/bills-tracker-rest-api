@@ -12,12 +12,14 @@ export class UserService {
       where: { id: userId },
       data: { ...dto },
     });
+    delete user.refreshTokenHash;
     delete user.passwordHash;
     return user;
   }
 
   async deleteUserById(userId: User['id']) {
     const user = await this.db.user.delete({ where: { id: userId } });
+    delete user.refreshTokenHash;
     delete user.passwordHash;
     return user;
   }

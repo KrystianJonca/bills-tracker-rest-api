@@ -23,6 +23,7 @@ export class UserController {
   @Get()
   @ApiOkResponse({ type: UserEntity })
   getUser(@GetUser() user: User) {
+    delete user.refreshTokenHash;
     return user;
   }
 
